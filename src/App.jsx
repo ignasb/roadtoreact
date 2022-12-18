@@ -21,23 +21,14 @@ const App = () => {
   ];
 
   const [searchTerm, setSearchTerm] = React.useState("");
-  const [storiesList, setStories] = React.useState(stories);
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
-
-    if (searchTerm) {
-      const filteredStories = storiesList.filter((story) =>
-        story.title
-          .toLocaleLowerCase()
-          .includes(searchTerm.toLocaleLowerCase()),
-      );
-
-      setStories(filteredStories);
-    } else {
-      setStories(stories);
-    }
   };
+
+  const searchedStories = stories.filter((story) =>
+    story.title.toLocaleLowerCase().includes(searchTerm.toLocaleLowerCase()),
+  );
 
   return (
     <div>
@@ -46,16 +37,13 @@ const App = () => {
       <Search onSearch={handleSearch} searchTerm={searchTerm} />
 
       <hr />
-      <List list={storiesList} />
+      <List list={searchedStories} />
     </div>
   );
 };
 
 const Search = (props) => {
-  const handleBlur = (event) => {
-    console.log(event);
-    console.log(event.target.value);
-  };
+  const handleBlur = (event) => {};
 
   return (
     <div>
@@ -63,6 +51,7 @@ const Search = (props) => {
       <input
         id="search"
         type="text"
+        value={props.searchTerm}
         onChange={props.onSearch}
         onBlur={handleBlur}
       />
