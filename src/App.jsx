@@ -20,7 +20,21 @@ const App = () => {
     },
   ];
 
-  const [searchTerm, setSearchTerm] = React.useState("");
+  const useStorageState = (key, initialState) => {
+    const [value, setValue] = React.useState(
+      localStorage.getItem(key) || initialState,
+    );
+
+    // Use effect should track value & key, otherwise it might run with outdated(stale) key/value values.
+    React.useEffect(() => {
+      localStorage.setItem(key, value);
+    }, [value, key]);
+
+    return [value, setValue];
+  };
+
+  // const initialSearchTerm = localStorage.getItem("search") || "React";
+  const [searchTerm, setSearchTerm] = useStorageState("search", "React");
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
