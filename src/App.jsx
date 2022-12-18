@@ -42,44 +42,34 @@ const App = () => {
   );
 };
 
-const Search = (props) => {
-  const handleBlur = (event) => {};
+const Search = ({ searchTerm, onSearch }) => (
+  <div>
+    <label htmlFor="search">Search: </label>
+    <input id="search" type="text" value={searchTerm} onChange={onSearch} />
 
-  return (
-    <div>
-      <label htmlFor="search">Search: </label>
-      <input
-        id="search"
-        type="text"
-        value={props.searchTerm}
-        onChange={props.onSearch}
-        onBlur={handleBlur}
-      />
+    <p>
+      Searching for <strong>{searchTerm}</strong>
+    </p>
+  </div>
+);
 
-      <p>
-        Searching for <strong>{props.searchTerm}</strong>
-      </p>
-    </div>
-  );
-};
-
-const List = (props) => (
+const List = ({ list }) => (
   <ul>
-    {props.list.map((item, index) => {
-      return <Item key={index} item={item} />;
+    {list.map(({ objectID, ...item }) => {
+      return <Item key={objectID} {...item} />;
     })}
   </ul>
 );
 
-const Item = (props) => (
-  <li key={props.index}>
-    {props.item.title}
+const Item = ({ title, url, author, num_comments, points }) => (
+  <li>
+    {title}
     <span>
-      <a href={props.item.url}>{props.item.title}</a>
+      <a href={url}>{title}</a>
     </span>
-    <span>{props.item.author}</span>
-    <span>{props.item.num_comments}</span>
-    <span>{props.item.points}</span>
+    <span>{author}</span>
+    <span>{num_comments}</span>
+    <span>{points}</span>
   </li>
 );
 
