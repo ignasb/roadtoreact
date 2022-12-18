@@ -25,7 +25,7 @@ const App = () => {
       localStorage.getItem(key) || initialState,
     );
 
-    // Use effect should track value & key, otherwise it might run with outdated(stale) key/value values.
+    // Custom hook should track value & key, otherwise it might run with outdated(stale) key/value values.
     React.useEffect(() => {
       localStorage.setItem(key, value);
     }, [value, key]);
@@ -57,14 +57,14 @@ const App = () => {
 };
 
 const Search = ({ searchTerm, onSearch }) => (
-  <div>
+  <>
     <label htmlFor="search">Search: </label>
     <input id="search" type="text" value={searchTerm} onChange={onSearch} />
 
     <p>
       Searching for <strong>{searchTerm}</strong>
     </p>
-  </div>
+  </>
 );
 
 const List = ({ list }) => (
