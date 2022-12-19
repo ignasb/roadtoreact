@@ -1,47 +1,55 @@
 import * as React from "react";
 
-const App = () => {
-  const stories = [
-    {
-      title: "React",
-      url: "https://reactjs.org/",
-      author: "Jordan Walke",
-      num_comments: 3,
-      points: 4,
-      objectID: 0,
-    },
-    {
-      title: "Redux",
-      url: "https://redux.js.org/",
-      author: "Dan Abramov, Andrew Clark",
-      num_comments: 2,
-      points: 5,
-      objectID: 1,
-    },
-  ];
+const initialStories = [
+  {
+    title: "React",
+    url: "https://reactjs.org/",
+    author: "Jordan Walke",
+    num_comments: 3,
+    points: 4,
+    objectID: 0,
+  },
+  {
+    title: "Redux",
+    url: "https://redux.js.org/",
+    author: "Dan Abramov, Andrew Clark",
+    num_comments: 2,
+    points: 5,
+    objectID: 1,
+  },
+];
 
-  const useStorageState = (key, initialState) => {
-    const [value, setValue] = React.useState(
-      localStorage.getItem(key) || initialState,
+const useStorageState = (key, initialState) => {
+  const [value, setValue] = React.useState(
+    localStorage.getItem(key) || initialState,
+  );
+
+  React.useEffect(() => {
+    localStorage.setItem(key, value);
+  }, [value, key]);
+
+  return [value, setValue];
+};
+
+const App = () => {
+  const [searchTerm, setSearchTerm] = useStorageState("search", "React");
+
+  const [stories, setStories] = React.useState(initialStories);
+
+  const handleRemoveStory = (item) => {
+    const newStories = stories.filter(
+      (story) => item.objectID !== story.objectID,
     );
 
-    // Custom hook should track value & key, otherwise it might run with outdated(stale) key/value values.
-    React.useEffect(() => {
-      localStorage.setItem(key, value);
-    }, [value, key]);
-
-    return [value, setValue];
+    setStories(newStories);
   };
-
-  // const initialSearchTerm = localStorage.getItem("search") || "React";
-  const [searchTerm, setSearchTerm] = useStorageState("search", "React");
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
   };
 
   const searchedStories = stories.filter((story) =>
-    story.title.toLocaleLowerCase().includes(searchTerm.toLocaleLowerCase()),
+    story.title.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -50,7 +58,6 @@ const App = () => {
 
       <InputWithLabel
         id="search"
-        label="Search"
         value={searchTerm}
         isFocused
         onInputChange={handleSearch}
@@ -58,7 +65,9 @@ const App = () => {
         <strong>Search:</strong>
       </InputWithLabel>
 
-      <List list={searchedStories} />
+      <hr />
+
+      <List list={searchedStories} onRemoveItem={handleRemoveStory} />
     </div>
   );
 };
@@ -88,33 +97,33 @@ const InputWithLabel = ({
         id={id}
         type={type}
         value={value}
-        autoFocus={isFocused}
         onChange={onInputChange}
       />
-      <p>
-        Searching for <strong>{value}</strong>
-      </p>
     </>
   );
 };
 
-const List = ({ list }) => (
+const List = ({ list, onRemoveItem }) => (
   <ul>
-    {list.map(({ objectID, ...item }) => {
-      return <Item key={objectID} {...item} />;
-    })}
+    {list.map((item) => (
+      <Item key={item.objectID} item={item} onRemoveItem={onRemoveItem} />
+    ))}
   </ul>
 );
 
-const Item = ({ title, url, author, num_comments, points }) => (
+const Item = ({ item, onRemoveItem }) => (
   <li>
-    {title}
     <span>
-      <a href={url}>{title}</a>
+      <a href={item.url}>{item.title}</a>
     </span>
-    <span>{author}</span>
-    <span>{num_comments}</span>
-    <span>{points}</span>
+    <span>{item.author}</span>
+    <span>{item.num_comments}</span>
+    <span>{item.points}</span>
+    <span>
+      <button type="button" onClick={() => onRemoveItem(item)}>
+        Dismiss
+      </button>
+    </span>
   </li>
 );
 
