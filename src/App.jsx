@@ -81,6 +81,11 @@ const StyledInput = styled.input`
   font-size: 24px;
 `;
 
+const getSumComments = (stories) => {
+  console.log("C");
+  return stories.data.reduce((result, value) => result + value.num_comments, 0);
+};
+
 const storiesReducer = (state, action) => {
   switch (action.type) {
     case "STORIES_FETCH_INIT":
@@ -115,12 +120,18 @@ const storiesReducer = (state, action) => {
 };
 
 const useStorageState = (key, initialState) => {
+  const isMounted = React.useRef(false);
+
   const [value, setValue] = React.useState(
     localStorage.getItem(key) || initialState,
   );
 
   React.useEffect(() => {
-    localStorage.setItem(key, value);
+    if (!isMounted.current) {
+      isMounted.current = true;
+    } else {
+      localStorage.setItem(key, value);
+    }
   }, [value, key]);
 
   return [value, setValue];
@@ -138,6 +149,8 @@ const App = () => {
     isLoading: false,
     isError: false,
   });
+
+  const sumComments = React.useMemo(() => getSumComments(stories), [stories]);
 
   const handleFetchStories = React.useCallback(async () => {
     dispatchStories({ type: "STORIES_FETCH_INIT" });
@@ -158,12 +171,12 @@ const App = () => {
     handleFetchStories();
   }, [handleFetchStories]);
 
-  const handleRemoveStory = (item) => {
+  const handleRemoveStory = React.useCallback((item) => {
     dispatchStories({
       type: "REMOVE_STORY",
       payload: item,
     });
-  };
+  }, []);
 
   const handleSearchInput = (event) => {
     setSearchTerm(event.target.value);
@@ -176,7 +189,9 @@ const App = () => {
 
   return (
     <StyledContainer>
-      <StyledHeadlinePrimary>My Hacker Stories</StyledHeadlinePrimary>
+      <StyledHeadlinePrimary>
+        My Hacker Stories with {sumComments} comments.
+      </StyledHeadlinePrimary>
 
       <SearchForm
         searchTerm={searchTerm}
@@ -243,13 +258,13 @@ const InputWithLabel = ({
   );
 };
 
-const List = ({ list, onRemoveItem }) => (
+const List = React.memo(({ list, onRemoveItem }) => (
   <ul>
     {list.map((item) => (
       <Item key={item.objectID} item={item} onRemoveItem={onRemoveItem} />
     ))}
   </ul>
-);
+));
 
 const Item = ({ item, onRemoveItem }) => (
   <StyledItem>
