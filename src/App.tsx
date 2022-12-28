@@ -86,7 +86,7 @@ const getSumComments = (stories) => {
   return stories.data.reduce((result, value) => result + value.num_comments, 0);
 };
 
-const storiesReducer = (state, action) => {
+const storiesReducer = (state: StoriesState, action: StoriesAction) => {
   switch (action.type) {
     case "STORIES_FETCH_INIT":
       return {
@@ -119,7 +119,64 @@ const storiesReducer = (state, action) => {
   }
 };
 
-const useStorageState = (key, initialState) => {
+type InputWithLabelProps = {
+  id: string;
+  value: string;
+  type?: string;
+  onInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  isFocused?: boolean;
+  children: React.ReactNode;
+}
+
+type Story = {
+  objectID: string;
+  url: string;
+  title: string;
+  author: string;
+  num_comments: number;
+  points: number;
+};
+
+type ItemProps = {
+  item: Story;
+  onRemoveItem: (item: Story) => void;
+}
+
+type Stories = Story[];
+
+type StoriesState = {
+  data: Stories;
+  isLoading: boolean;
+  isError: boolean;
+};
+
+type StoriesFetchInitAction = {
+  type: 'STORIES_FETCH_INIT';
+}
+
+type StoriesFetchSuccessAction = {
+  type: 'STORIES_FETCH_SUCCESS';
+  payload: Stories;
+}
+
+type StoriesFetchFailureAction = {
+  type: 'STORIES_FETCH_FAILURE';
+}
+
+type StoriesRemoveAction = {
+  type: 'REMOVE_STORY';
+  payload: Story;
+}
+
+type StoriesAction = StoriesFetchInitAction | StoriesFetchSuccessAction | StoriesFetchFailureAction | StoriesRemoveAction;
+
+type SearchFormProps = {
+  searchTerm: string;
+  onSearchInput: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onSearchSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+}
+
+const useStorageState = (key: string, initialState: string): [string, (newValue: string) => void] => {
   const isMounted = React.useRef(false);
 
   const [value, setValue] = React.useState(
@@ -171,18 +228,18 @@ const App = () => {
     handleFetchStories();
   }, [handleFetchStories]);
 
-  const handleRemoveStory = React.useCallback((item) => {
+  const handleRemoveStory = React.useCallback((item: Story) => {
     dispatchStories({
       type: "REMOVE_STORY",
       payload: item,
     });
   }, []);
 
-  const handleSearchInput = (event) => {
+  const handleSearchInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
 
-  const handleSearchSubmit = (event) => {
+  const handleSearchSubmit = (event: React.ChangeEvent<HTMLFormElement>) => {
     setUrl(`${API_ENDPOINT}${searchTerm}`);
     event.preventDefault();
   };
@@ -210,7 +267,7 @@ const App = () => {
   );
 };
 
-const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit }) => (
+const SearchForm: React.FC<SearchFormProps> = ({ searchTerm, onSearchInput, onSearchSubmit }) => (
   <StyledSearchForm onSubmit={onSearchSubmit}>
     <InputWithLabel
       id="search"
@@ -227,7 +284,8 @@ const SearchForm = ({ searchTerm, onSearchInput, onSearchSubmit }) => (
   </StyledSearchForm>
 );
 
-const InputWithLabel = ({
+
+const InputWithLabel: React.FC<InputWithLabelProps> = ({
   id,
   value,
   type = "text",
@@ -235,7 +293,7 @@ const InputWithLabel = ({
   isFocused,
   children,
 }) => {
-  const inputRef = React.useRef();
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     if (isFocused && inputRef.current) {
@@ -266,7 +324,7 @@ const List = React.memo(({ list, onRemoveItem }) => (
   </ul>
 ));
 
-const Item = ({ item, onRemoveItem }) => (
+const Item = ({ item, onRemoveItem }: ItemProps): JSX.Element => (
   <StyledItem>
     <StyledColumn style={{ width: "40%" }}>
       <a href={item.url}>{item.title}</a>
